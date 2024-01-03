@@ -1,34 +1,38 @@
-# ASP.NET Core (.NET Framework)
-# Build and test ASP.NET Core projects targeting the full .NET Framework.
-# Add steps that publish symbols, save build artifacts, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
-
 trigger:
 - master
 
+pr:
+- master
+
 pool:
-  vmImage: 'windows-latest'
+  vmImage: 'windows-latest'  
 
 variables:
-  solution: '**/*.sln'
-  buildPlatform: 'Any CPU'
-  buildConfiguration: 'Release'
+  appName: 'NewWebAppDotNETArs'  # Replace with your Azure App Service name
+  azureSubscription: 'Mindtree Poland DEV'  # Replace with your Azure subscription name
+  gitHubRepo: 'https://github.com/ArslanTem/WebApp.NET'  # Replace with your GitHub repository URL
+  environmentName: 'production'  # Replace with the name of your deployment environment
 
-steps:
-- task: NuGetToolInstaller@1
+stages:
+- stage: Deploy
+  jobs:
+  - job: Deploy
+    displayName: 'Deploy to Azure App Service'
+    steps:
+    - checkout: self
 
-- task: NuGetCommand@2
-  inputs:
-    restoreSolution: '$(solution)'
+    - task: UseDotNet@2
+      displayName: 'Use .NET Core SDK'
+      inputs:
+        packageType: 'sdk'
+        version: '7.x'
 
-- task: VSBuild@1
-  inputs:
-    solution: '$(solution)'
-    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:DesktopBuildPackageLocation="$(build.artifactStagingDirectory)\WebApp.zip" /p:DeployIisAppPath="Default Web Site"'
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
-
-- task: VSTest@2
-  inputs:
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+    - task: AzureWebApp@1
+      displayName: 'Azure Web App Deploy'
+      inputs:
+        azureSubscription: $(azureSubscription)
+        appName: $(appName)
+        package: $(Pipeline.Workspace)/drop/**/*.zip
+        deploymentMethod: 'zipDeploy'
+        enableCustomDeployment: true
+        deploymentSlots: 'Production'  # Replace with the deployment slot name if used
