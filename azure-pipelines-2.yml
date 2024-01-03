@@ -26,6 +26,10 @@ stages:
       inputs:
         packageType: 'sdk'
         version: '7.x'
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathToPublish: '$(Build.ArtifactStagingDirectory)'
+        artifactName: drop
 
     - task: AzureWebApp@1
       displayName: 'Azure Web App Deploy'
