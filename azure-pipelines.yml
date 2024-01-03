@@ -32,7 +32,8 @@ stages:
       inputs:
         azureSubscription: $(azureSubscription)
         appName: $(appName)
-        package: $(Pipeline.Workspace)/drop/**/*.zip
-        deploymentMethod: 'zipDeploy'
+        package: $(githubRepo)#$(master)
+        deploymentMethod: 'auto'
+        appType: webApp
         enableCustomDeployment: true
-        deploymentSlots: 'Production'  # Replace with the deployment slot name if used
+        deploymentSlots: 'Production' 
