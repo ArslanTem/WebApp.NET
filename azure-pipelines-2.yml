@@ -15,30 +15,48 @@ variables:
   branchName: 'master'
 
 stages:
-- stage: Deploy
-  jobs:
-  - job: Deploy
-    displayName: 'Deploy to Azure App Service'
-    steps:
-    - checkout: self
+- stage: 'Build'
+  displayName: 'Build the web application'
+  jobs: 
+  - job: 'Build'
+    displayName: 'Build job'
+    pool:
+      name: 'Default'
 
+    steps:
+    # Step 1: Use the specified version of .NET Core SDK
     - task: UseDotNet@2
-      displayName: 'Use .NET Core SDK'
+      displayName: 'Use .NET Core sdk 6.x'
       inputs:
-        packageType: 'sdk'
-        version: '7.x'
-    - task: PublishBuildArtifacts@1
+        version: 6.x
+
+    # Step 2: Restore project dependencies
+    - task: DotNetCoreCLI@2
+      displayName: 'Restore project dependencies'
       inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-        ArtifactName: 'drop'
-        publishLocation: 'Container'
-        MaxArtifactSize: 1
-    - task: AzureRmWebAppDeployment@4
+        command: 'restore'
+        projects: '**/*.csproj'
+
+    # Step 3: Build the project using the specified build configuration
+    - task: DotNetCoreCLI@2
+      displayName: 'Build the project - $(buildConfiguration)'
       inputs:
-       ConnectionType: 'AzureRM'
-       azureSubscription: 'Mindtree Poland DEV (e504bc3f-d3d7-4548-81ce-692a4fe7ff93)'
-       appType: 'webApp'
-       WebAppName: 'NewWebAppDotNETArs'
-       packageForLinux: '$(Build.ArtifactStagingDirectory)/**/*.zip'
-       enableCustomDeployment: true
-       DeploymentType: 'webDeploy'
+        command: 'build'
+        arguments: '--no-restore --configuration $(buildConfiguration)'
+        projects: '**/*.csproj'
+        feedsToUse: 'select'
+        vstsFeed: 'db8ca479-0212-4cd1-8a09-2b3abcb94acd/8621e47e-89e8-49c1-87bb-1a7285608233'
+
+    # Step 4: Publish the project to the specified output directory
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish the project - $(buildConfiguration)'
+      inputs:
+        command: 'publish'
+        projects: '**/*.csproj'
+        publishWebProjects: false
+        arguments: '--no-build --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/$(buildConfiguration)'
+        zipAfterPublish: true
+
+    # Step 5: Publish the build artifacts for deployment
+    - publish: '$(Build.ArtifactStagingDirectory)'
+      artifact: drop
