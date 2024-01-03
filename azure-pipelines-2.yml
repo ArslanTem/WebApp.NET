@@ -29,15 +29,16 @@ stages:
         version: '7.x'
     - task: PublishBuildArtifacts@1
       inputs:
-        pathToPublish: '$(Build.ArtifactStagingDirectory)'
-        artifactName: drop
-
-    - task: AzureWebApp@1
-      displayName: 'Azure Web App Deploy'
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'drop'
+        publishLocation: 'Container'
+        MaxArtifactSize: 1
+    - task: AzureRmWebAppDeployment@4
       inputs:
-        azureSubscription: $(azureSubscription)
-        appName: $(appName)
-        package: $(gitHubRepository)#$(branchName)
-        deploymentMethod: 'zipDeploy'
-        enableCustomDeployment: true
-        deploymentSlots: 'Production'  # Replace with the deployment slot name if used
+       ConnectionType: 'AzureRM'
+       azureSubscription: 'Mindtree Poland DEV (e504bc3f-d3d7-4548-81ce-692a4fe7ff93)'
+       appType: 'webApp'
+       WebAppName: 'NewWebAppDotNETArs'
+       packageForLinux: '$(System.DefaultWorkingDirectory)/**/*.zip'
+       enableCustomDeployment: true
+       DeploymentType: 'webDeploy'
