@@ -10,8 +10,9 @@ pool:
 variables:
   appName: 'NewWebAppDotNETArs'  # Replace with your Azure App Service name
   azureSubscription: 'Mindtree Poland DEV (e504bc3f-d3d7-4548-81ce-692a4fe7ff93)'
-  gitHubRepo: 'https://github.com/ArslanTem/WebApp.NET'  # Replace with your GitHub repository URL
-  environmentName: 'production'  # Replace with the name of your deployment environment
+  gitHubRepository: 'https://github.com/ArslanTem/WebApp.NET'  
+  environmentName: 'production'
+  branchName: 'master'
 
 stages:
 - stage: Deploy
@@ -36,7 +37,7 @@ stages:
       inputs:
         azureSubscription: $(azureSubscription)
         appName: $(appName)
-        package: $(Pipeline.Workspace)/drop/**/*.zip
+        package: $(gitHubRepository)#$(branchName)
         deploymentMethod: 'zipDeploy'
         enableCustomDeployment: true
         deploymentSlots: 'Production'  # Replace with the deployment slot name if used
