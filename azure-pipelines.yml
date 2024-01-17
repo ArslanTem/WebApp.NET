@@ -40,10 +40,3 @@ steps:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
     
-- task: AzureRmWebAppDeployment@4
-  inputs:
-    ConnectionType: 'AzureRM'
-    azureSubscription: 'Mindtree Poland DEV (e504bc3f-d3d7-4548-81ce-692a4fe7ff93)'
-    appType: 'webApp'
-    WebAppName: 'DotNetCDArsWebApp'
-    packageForLinux: '$(System.DefaultWorkingDirectory)/**/*.zip'
